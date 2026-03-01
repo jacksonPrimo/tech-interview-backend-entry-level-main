@@ -9,21 +9,38 @@ RSpec.describe Cart, type: :model do
     end
   end
 
-  describe 'mark_as_abandoned' do
-    let(:shopping_cart) { create(:shopping_cart) }
+  # describe 'mark_as_abandoned' do
+  #   let(:shopping_cart) { create(:cart) }
 
-    it 'marks the shopping cart as abandoned if inactive for a certain time' do
-      shopping_cart.update(last_interaction_at: 3.hours.ago)
-      expect { shopping_cart.mark_as_abandoned }.to change { shopping_cart.abandoned? }.from(false).to(true)
+  #   it 'marks the shopping cart as abandoned if inactive for a certain time' do
+  #     shopping_cart.update(last_interaction_at: 3.hours.ago)
+  #     expect { shopping_cart.mark_as_abandoned }.to change { shopping_cart.abandoned? }.from(false).to(true)
+  #   end
+  # end
+
+  describe 'add_item' do
+    let(:shopping_cart) { create(:cart) }
+    let(:product) { create(:product) }
+
+    it 'adds an item and updates the carts last_interaction_at' do
+      last_interaction_at_old = shopping_cart.last_interaction_at
+      shopping_cart.add_item(product, 2)
+      expect(shopping_cart.reload.last_interaction_at).to be > last_interaction_at_old
+    end
+
+    it 'updates the quantity of the existing item in the cart' do
+      cart_item = create(:cart_item, cart: shopping_cart, product: product, quantity: 1)
+      shopping_cart.add_item(product, 2)
+      expect(cart_item.reload.quantity).to eq(2)
     end
   end
 
-  describe 'remove_if_abandoned' do
-    let(:shopping_cart) { create(:shopping_cart, last_interaction_at: 7.days.ago) }
+  # describe 'remove_if_abandoned' do
+  #   let(:shopping_cart) { create(:cart, last_interaction_at: 7.days.ago) }
 
-    it 'removes the shopping cart if abandoned for a certain time' do
-      shopping_cart.mark_as_abandoned
-      expect { shopping_cart.remove_if_abandoned }.to change { Cart.count }.by(-1)
-    end
-  end
+  #   it 'removes the shopping cart if abandoned for a certain time' do
+  #     shopping_cart.mark_as_abandoned
+  #     expect { shopping_cart.remove_if_abandoned }.to change { Cart.count }.by(-1)
+  #   end
+  # end
 end

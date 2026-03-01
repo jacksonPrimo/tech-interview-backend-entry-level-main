@@ -8,6 +8,7 @@ Rails.application.routes.draw do
   root "rails/health#show"
 
   scope :cart do
+    get '/:cart_id', to: 'carts#show'
     post '/', to: 'carts#add_item'
     delete '/:product_id', to: 'carts#remove_item'
   end

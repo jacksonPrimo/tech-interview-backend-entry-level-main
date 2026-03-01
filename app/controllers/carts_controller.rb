@@ -1,5 +1,13 @@
 class CartsController < ApplicationController
-  def add_item
+  def show
+    cart = ::CartServices::ShowCartService.new(
+      cart_id: params[:cart_id]
+    ).call
+
+    render json: cart, status: :ok
+  end
+
+  def add_item    
     cart = ::CartServices::AddItemService.new(
       cart_id: params[:cart_id],
       product_id: params[:product_id],

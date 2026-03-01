@@ -68,4 +68,54 @@ RSpec.describe "/carts", type: :request do
       end
     end
   end
+
+  describe "DELETE /:product_id" do
+    let(:endpoint) { ->(product_id) { "/cart/#{product_id}" } }
+
+    context 'failure cases' do
+      it "failure if cart not found" do
+        delete endpoint.call(1), params: { cart_id: 999999999999999999 }, as: :json
+        expect(response).to have_http_status(:not_found)
+        expect(response.parsed_body['error']).to eq('Cart not found')
+      end
+
+      it "failure if product not found in database" do
+        cart = create(:cart)
+        delete endpoint.call(999999999999999999), params: { cart_id: cart.id }, as: :json
+        expect(response).to have_http_status(:not_found)
+        expect(response.parsed_body['error']).to eq('Product not found')
+      end
+
+      it "failure if product not found in cart" do
+        cart = create(:cart)
+        product = create(:product)
+        delete endpoint.call(product.id), params: { cart_id: cart.id }, as: :json
+        expect(response).to have_http_status(:not_found)
+        expect(response.parsed_body['error']).to eq('Product not found in cart')
+      end
+    end
+
+    context 'success cases' do
+      it "removes the item from the cart and returns updated payload" do
+        cart = create(:cart)
+        product1 = create(:product, price: 10.0)
+        product2 = create(:product, price: 5.0)
+        create(:cart_item, cart: cart, product: product1, quantity: 2)
+        create(:cart_item, cart: cart, product: product2, quantity: 1)
+        cart.update_total!
+        
+        expect(cart.cart_items.count).to eq(2)
+        expect(cart.total_price).to eq(25.0)
+
+        delete endpoint.call(product1.id), params: { cart_id: cart.id }, as: :json
+        expect(response).to have_http_status(:ok)
+        
+        response_body = response.parsed_body
+        expect(response_body['id']).to eq(cart.id)
+        expect(response_body['total_price']).to eq("5.0")
+        expect(response_body['products'].size).to eq(1)
+        expect(response_body['products'].first['id']).to eq(product2.id)
+      end
+    end
+  end
 end

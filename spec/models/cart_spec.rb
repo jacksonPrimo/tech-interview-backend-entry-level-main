@@ -61,6 +61,32 @@ RSpec.describe Cart, type: :model do
     end
   end
 
+  describe 'change_item_quantity' do
+    let(:shopping_cart) { create(:cart) }
+    let(:product) { create(:product, price: 50.0) }
+
+    before do
+      shopping_cart.add_item(product, 2)
+    end
+
+    it 'substitutes the item quantity directly' do
+      shopping_cart.change_item_quantity(product, 10)
+      expect(shopping_cart.cart_items.find_by(product: product).quantity).to eq(10)
+    end
+
+    it 'updates total_price correctly after substitution' do
+      expect(shopping_cart.reload.total_price).to eq(100.0)
+      shopping_cart.change_item_quantity(product, 4)
+      expect(shopping_cart.reload.total_price).to eq(200.0)
+    end
+
+    it 'updates last_interaction_at' do
+      last_interaction_at_old = shopping_cart.reload.last_interaction_at
+      shopping_cart.change_item_quantity(product, 3)
+      expect(shopping_cart.reload.last_interaction_at).to be > last_interaction_at_old
+    end
+  end
+
   # describe 'remove_if_abandoned' do
   #   let(:shopping_cart) { create(:cart, last_interaction_at: 7.days.ago) }
 

@@ -32,7 +32,7 @@ services:
 
     test:
         build: .
-        command: bash -c "bundle exec rails db:prepare && bundle exec rspec $${RSPEC_ARGS:-}"
+        command: bash -c 'bundle exec rails db:prepare && eval bundle exec rspec $${RSPEC_ARGS:-}'
         volumes:
             - .:/rails
         depends_on:

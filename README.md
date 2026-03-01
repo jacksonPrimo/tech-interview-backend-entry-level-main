@@ -189,7 +189,22 @@ A aplicação já possui um Dockerfile, que define como a aplicação deve ser c
 - postgres 16
 - redis 7.0.15
 
-### Como executar o projeto
+### Como executar o projeto utilizando docker
+
+Executar o projeto:
+```bash
+docker compose up
+```
+
+Executar todos os testes:
+```bash
+docker compose run --rm test
+```
+
+Executar os testes com os argumentos do rspec:
+```bash
+docker compose run --rm -e RSPEC_ARGS="spec/path_do_test/test.rb -e 'description test'" test
+```
 
 ## Executando a app sem o docker
 Dado que todas as as ferramentas estão instaladas e configuradas:

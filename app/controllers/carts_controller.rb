@@ -1,3 +1,11 @@
 class CartsController < ApplicationController
-  ## TODO Escreva a lógica dos carrinhos aqui
+  def add_item
+    cart = ::CartServices::AddItemService.new(
+      cart_id: params[:cart_id],
+      product_id: params[:product_id],
+      quantity: params[:quantity]
+    ).call
+    
+    render json: cart, status: :ok
+  end
 end

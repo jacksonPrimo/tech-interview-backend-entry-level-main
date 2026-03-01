@@ -9,7 +9,8 @@ class Cart < ApplicationRecord
       item = self.cart_items.find_or_initialize_by(product_id: product.id)
       item.quantity = quantity
       item.save!
-      update_total!      
+      update_total!
+      update!(last_interaction_at: Time.current)
     end
   end
 

@@ -23,6 +23,15 @@ class Cart < ApplicationRecord
     end
   end
 
+  def change_item_quantity(product, new_quantity)
+    ActiveRecord::Base.transaction do
+      item = self.cart_items.find_by!(product_id: product.id)
+      item.update!(quantity: new_quantity)
+      update_total!
+      update!(last_interaction_at: Time.current)
+    end
+  end
+
   def update_total!
     total = cart_items.joins(:product).sum('cart_items.quantity * products.price')    
     update!(total_price: total)

@@ -10,6 +10,7 @@ Rails.application.routes.draw do
   scope :cart do
     get '/:cart_id', to: 'carts#show'
     post '/', to: 'carts#add_item'
+    post '/add_item', to: 'carts#change_quantity'
     delete '/:product_id', to: 'carts#remove_item'
   end
 end

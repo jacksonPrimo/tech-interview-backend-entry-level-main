@@ -9,5 +9,6 @@ Rails.application.routes.draw do
 
   scope :cart do
     post '/', to: 'carts#add_item'
+    delete '/:product_id', to: 'carts#remove_item'
   end
 end

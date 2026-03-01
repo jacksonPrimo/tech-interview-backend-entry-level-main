@@ -1,6 +1,45 @@
 require 'rails_helper'
 
 RSpec.describe "/carts", type: :request do
+  describe "GET /" do
+    let(:endpoint) { ->(cart_id) { "/cart/#{cart_id}" } }
+
+    context 'failure cases' do
+      it "failure if cart not found" do
+        get endpoint.call(999999999999999999), as: :json
+        expect(response).to have_http_status(:not_found)
+        expect(response.parsed_body['error']).to eq('Cart not found')
+      end
+    end
+
+    context 'success cases' do
+      it "returns the cart and its products" do
+        cart = create(:cart)
+        product1 = create(:product, price: 10.0)
+        product2 = create(:product, price: 5.0)
+        create(:cart_item, cart: cart, product: product1, quantity: 2)
+        create(:cart_item, cart: cart, product: product2, quantity: 1)
+        cart.update_total!
+        
+        get endpoint.call(cart.id), as: :json
+        expect(response).to have_http_status(:ok)
+        
+        response_body = response.parsed_body
+        expect(response_body['id']).to eq(cart.id)
+        expect(response_body['total_price']).to eq("25.0")
+        expect(response_body['products'].size).to eq(2)
+        
+        expect(response_body['products'].first['id']).to eq(product1.id)
+        expect(response_body['products'].first['quantity']).to eq(2)
+        expect(response_body['products'].first['total_price']).to eq("20.0")
+
+        expect(response_body['products'].last['id']).to eq(product2.id)
+        expect(response_body['products'].last['quantity']).to eq(1)
+        expect(response_body['products'].last['total_price']).to eq("5.0")
+      end
+    end
+  end
+
   describe "POST /" do
     let(:endpoint) { '/cart' }
 
